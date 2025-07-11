@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لعبة تحديات صيفية</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Cairo', sans-serif;
+    background: linear-gradient(135deg, #FFD6E8, #FFF7AA);
+    color: #333;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 90vw;
+    max-width: 500px;
+    padding: 20px;
+    border-radius: 25px;
+    background: rgba(255 255 255 / 0.9);
+    box-shadow: 0 0 25px rgba(0,0,0,0.15);
+    color: #222;
+  }
+  .screen.active {
+    display: flex;
+  }
+  button, select {
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 12px 25px;
+    margin: 15px 0;
+    border-radius: 20px;
+    border: 3px solid #F57C00;
+    background: transparent;
+    color: #E65100;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  button:hover, select:hover {
+    background: #F57C00;
+    color: white;
+  }
+  h1 {
+    margin-bottom: 25px;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #E65100;
+  }
+  .challenge-boxes {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+  .challenge-box {
+    border: 3px solid #F57C00;
+    border-radius: 20px;
+    padding: 25px 15px;
+    font-weight: 900;
+    font-size: 1.6rem;
+    cursor: pointer;
+    background: rgba(245 124 0 / 0.15);
+    color: #E65100;
+    text-align: center;
+    user-select: none;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .challenge-box:hover {
+    background: #F57C00;
+    color: white;
+    box-shadow: 0 0 20px #F57C00;
+  }
+  .question-box {
+    border: 3px solid #F57C00;
+    border-radius: 20px;
+    padding: 20px;
+    background: rgba(245 124 0 / 0.1);
+    width: 100%;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #333;
+  }
+  .answers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .answer-btn {
+    background: transparent;
+    border: 2px solid #E65100;
+    border-radius: 15px;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #E65100;
+    user-select: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  .answer-btn:hover {
+    background: #F57C00;
+    color: white;
+  }
+  .answer-btn.correct {
+    background: #4CAF50;
+    border-color: #4CAF50;
+    color: white;
+  }
+  .answer-btn.wrong {
+    background: #f44336;
+    border-color: #f44336;
+    color: white;
+  }
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    width: 100%;
+  }
+  .controls button {
+    width: 48%;
+    border: 3px solid #E65100;
+    background: transparent;
+    color: #E65100;
+    font-weight: 900;
+    font-size: 1.3rem;
+  }
+  .controls button:hover {
+    background: #E65100;
+    color: white;
+  }
+  .timer, .score {
+    font-size: 1.3rem;
+    font-weight: 900;
+    margin: 10px 0;
+    color: #E65100;
+  }
+  .feedback {
+    font-size: 1.4rem;
+    font-weight: 900;
+    margin: 15px 0;
+    min-height: 35px;
+    color: #E65100;
+    text-shadow: 0 0 5px #F57C00;
+  }
+</style>
+</head>
+<body>
+
+<div id="startScreen" class="screen active">
+  <h1>ابدأ اللعب الآن</h1>
+  <button id="startBtn">ابدأ اللعب الآن ▶️</button>
+</div>
+
+<div id="languageScreen" class="screen">
+  <h1>اختر لغتك</h1>
+  <select id="languageSelect">
+    <option value="ar" selected>العربية</option>
+    <option value="en">English</option>
+  </select>
+  <button id="languageNextBtn">التالي</button>
+</div>
+
+<div id="readyScreen" class="screen">
+  <h1>هل أنت مستعد لتحديات الآن؟</h1>
+  <button id="readyStartBtn">ابدأ التحديات</button>
+</div>
+
+<div id="challengesScreen" class="screen">
+  <h1>اختر التحدي</h1>
+  <div class="challenge-boxes">
+    <div id="questionChallengeBox" class="challenge-box">تحدي الأسئلة</div>
+    <div id="photoChallengeBox" class="challenge-box">تحدي الصور</div>
+    <div id="rulingsChallengeBox" class="challenge-box">تحدي الأحكام</div>
+  </div>
+</div>
+
+<div id="gameInstructionsScreen" class="screen">
+  <h1>كيف تلعب؟</h1>
+  <p style="font-size:1.2rem; line-height:1.5;">
+    ستخوض تحديات ممتعة في كل لعبة. أجب عن الأسئلة بسرعة واكسب نقاطًا!<br/>
+    في تحدي الصور، قم بالتقاط الصور المطلوبة وإرسالها.<br/>
+    تحدي الأحكام يختبر حكمتك ومعرفتك.<br/>
+    استمتع وتحدى أصدقاءك!
+  </p>
+  <button id="startChallengeBtn">ابدأ التحدي الآن</button>
+  <button id="backToChallengesBtn2" style="background:#ccc; color:#333; border-color:#aaa;">العودة للقائمة</button>
+</div>
+
+<div id="questionTypeScreen" class="screen">
+  <h1>اختر نوع الأسئلة</h1>
+  <div class="challenge-boxes">
+    <div class="challenge-box" data-type="general">الأسئلة العامة</div>
+    <div class="challenge-box" data-type="history">الأسئلة التاريخية</div>
+    <div class="challenge-box" data-type="geography">الأسئلة الجغرافية</div>
+    <div class="challenge-box" data-type="culture">الأسئلة الثقافية</div>
+  </div>
+  <button id="backToChallengesBtn">العودة للقائمة</button>
+</div>
+
+<div id="questionGameScreen" class="screen">
+  <div class="timer">الوقت المتبقي: <span id="timeLeft">30</span> ثانية</div>
+  <div class="score">النقاط: <span id="score">0</span></div>
+  <div class="question-box" id="questionText">السؤال هنا</div>
+  <div class="answers" id="answersContainer"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="controls">
+    <button id="nextQuestionBtn" disabled>التالي</button>
+    <button id="backToQuestionTypesBtn">العودة للقائمة</button>
+  </div>
+</div>
+
+<div id="photoChallengeScreen" class="screen">
+  <h1>تحدي الصور</h1>
+  <p>صوّر الأشياء المطلوبة وارسلها! (سيتم تطوير خاصية الرفع لاحقاً)</p>
+  <button id="photoBackBtn">العودة للقائمة</button>
+</div>
+
+<div id="rulingsChallengeScreen" class="screen">
+  <h1>تحدي الأحكام</h1>
+  <p>اختبر حكمتك! (التحدي سيتم تطويره لاحقاً)</p>
+  <button id="rulingsBackBtn">العودة للقائمة</button>
+</div>
+
+<script>
+  const screens = {
+    start: document.getElementById('startScreen'),
+    language: document.getElementById('languageScreen'),
+    ready: document.getElementById('readyScreen'),
+    challenges: document.getElementById('challengesScreen'),
+    gameInstructions: document.getElementById('gameInstructionsScreen'),
+    questionType: document.getElementById('questionTypeScreen'),
+    questionGame: document.getElementById('questionGameScreen'),
+    photoChallenge: document.getElementById('photoChallengeScreen'),
+    rulingsChallenge: document.getElementById('rulingsChallengeScreen'),
+  };
+
+  let score = 0;
+  let timerInterval;
+  let timeLeft = 30;
+  let currentQuestionIndex = 0;
+  let currentQuestions = [];
+  let currentChallengeType = "";
+
+  const questionsData = {
+    general: [
+      { question: "ما هو أكبر كوكب في المجموعة الشمسية؟", answers: ["الأرض", "المشتري", "المريخ", "زحل"], correct: 1 },
+      { question: "كم عدد القارات في العالم؟", answers: ["5", "6", "7", "8"], correct: 2 },
+      { question: "ما هو لون السماء في يوم صيفي صافٍ؟", answers: ["أحمر", "أزرق", "أصفر", "أخضر"], correct: 1 },
+      { question: "أي فصل يأتي بعد الربيع؟", answers: ["الصيف", "الخريف", "الشتاء", "الخريف"], correct: 0 }
+    ],
+    history: [
+      { question: "في أي عام وقعت معركة اليرموك؟", answers: ["636", "700", "610", "750"], correct: 0 },
+      { question: "من هو أول خليفة في الإسلام؟", answers: ["أبو بكر", "عمر", "عثمان", "علي"], correct: 0 },
+      { question: "من اكتشف أمريكا؟", answers: ["كولومبوس", "ماجلان", "كريستوفر كولومبوس", "فاسكو دا غاما"], correct: 2 },
+      { question: "ما هي الحضارة التي بنت الأهرامات؟", answers: ["الرومان", "الإغريق", "المصريون القدماء", "الفراعنة"], correct: 2 }
+    ],
+    geography: [
+      { question: "ما هي عاصمة اليابان؟", answers: ["طوكيو", "كيوبو", "أوساكا", "ناغويا"], correct: 0 },
+      { question: "أين يقع نهر الأمازون؟", answers: ["أفريقيا", "آسيا", "أمريكا الجنوبية", "أوروبا"], correct: 2 },
+      { question: "ما هو أعلى جبل في العالم؟", answers: ["إيفرست", "كينغ", "كليمنجارو", "ألب"], correct: 0 },
+      { question: "أي دولة تعتبر الأكبر مساحة في العالم؟", answers: ["روسيا", "كندا", "الصين", "الولايات المتحدة"], correct: 0 }
+    ],
+    culture: [
+      { question: "ما هو أصل كرة القدم؟", answers: ["إنجلترا", "ألمانيا", "فرنسا", "إيطاليا"], correct: 0 },
+      { question: "من كتب ألف ليلة وليلة؟", answers: ["جبران خليل جبران", "أحمد شوقي", "غير معروف", "نجيب محفوظ"], correct: 2 },
+      { question: "ما هو اللون الوطني للعلم الياباني؟", answers: ["أحمر", "أبيض", "أزرق", "أخضر"], correct: 0 },
+      { question: "ما هي أشهر رقصة في البرازيل؟", answers: ["السامبا", "الهوكا", "التانغو", "الفالس"], correct: 0 }
+    ]
+  };
+
+  function showScreen(name) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  document.getElementById('startBtn').onclick = () => showScreen('language');
+
+  document.getElementById('languageNextBtn').onclick = () => showScreen('ready');
+
+  document.getElementById('readyStartBtn').onclick = () => showScreen('challenges');
+
+  document.getElementById('questionChallengeBox').onclick = () => {
+    showScreen('gameInstructions');
+    currentChallengeType = 'questions';
+  };
+
+  document.getElementById('photoChallengeBox').onclick = () => {
+    showScreen('gameInstructions');
+    currentChallengeType = 'photo';
+  };
+
+  document.getElementById('rulingsChallengeBox').onclick = () => {
+    showScreen('gameInstructions');
+    currentChallengeType = 'rulings';
+  };
+
+  document.getElementById('startChallengeBtn').onclick = () => {
+    if(currentChallengeType === 'questions') showScreen('questionType');
+    else if(currentChallengeType === 'photo') showScreen('photoChallenge');
+    else if(currentChallengeType === 'rulings') showScreen('rulingsChallenge');
+  };
+
+  document.getElementById('backToChallengesBtn').onclick = () => showScreen('challenges');
+
+  document.getElementById('backToChallengesBtn2').onclick = () => showScreen('challenges');
+
+  document.getElementById('photoBackBtn').onclick = () => showScreen('challenges');
+
+  document.getElementById('rulingsBackBtn').onclick = () => showScreen('challenges');
+
+  document.querySelectorAll('#questionTypeScreen .challenge-box').forEach(box => {
+    box.onclick = () => {
+      const type = box.dataset.type;
+      currentQuestions = questionsData[type];
+      currentQuestionIndex = 0;
+      score = 0;
+      timeLeft = 30;
+      showScreen('questionGame');
+      loadQuestion();
+      startTimer();
+    };
+  });
+
+  document.getElementById('backToQuestionTypesBtn').onclick = () => {
+    stopTimer();
+    showScreen('questionType');
+  };
+
+  document.getElementById('nextQuestionBtn').onclick = () => {
+    currentQuestionIndex++;
+    if (currentQuestionIndex >= currentQuestions.length) {
+      alert(`انتهت الأسئلة! نقاطك: ${score}`);
+      showScreen('questionType');
+    } else {
+      timeLeft = 30;
+      loadQuestion();
+      startTimer();
+      document.getElementById('feedback').textContent = "";
+      document.getElementById('nextQuestionBtn').disabled = true;
+    }
+  };
+
+  function loadQuestion() {
+    stopTimer();
+    document.getElementById('score').textContent = score;
+    document.getElementById('timeLeft').textContent = timeLeft;
+    const q = currentQuestions[currentQuestionIndex];
+    document.getElementById('questionText').textContent = q.question;
+    const answersContainer = document.getElementById('answersContainer');
+    answersContainer.innerHTML = '';
+    q.answers.forEach((ans, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = ans;
+      btn.onclick = () => selectAnswer(i);
+      answersContainer.appendChild(btn);
+    });
+    document.getElementById('nextQuestionBtn').disabled = true;
+  }
+
+  function selectAnswer(index) {
+    stopTimer();
+    const q = currentQuestions[currentQuestionIndex];
+    const buttons = document.querySelectorAll('.answer-btn');
+    buttons.forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add('correct');
+      if (i === index && i !== q.correct) btn.classList.add('wrong');
+    });
+    if(index === q.correct) {
+      score += 10;
+      document.getElementById('feedback').textContent = 'إجابة صحيحة! 🎉';
+    } else {
+      document.getElementById('feedback').textContent = 'إجابة خاطئة! ❌';
+    }
+    document.getElementById('score').textContent = score;
+    document.getElementById('nextQuestionBtn').disabled = false;
+  }
+
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('timeLeft').textContent = timeLeft;
+      if(timeLeft <= 0) {
+        stopTimer();
+        document.getElementById('feedback').textContent = 'انتهى الوقت!';
+        document.getElementById('nextQuestionBtn').disabled = false;
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => btn.disabled = true);
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+  }
+
+</script>
+
+</body>
+</html>
